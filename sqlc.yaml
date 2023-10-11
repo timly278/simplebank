@@ -1,0 +1,25 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "./db/query/"
+    schema: "./db/migration"
+    database:
+        uri: postgresql://root:tulb@localhost:5432/simple_bank?sslmode=disable
+    gen:
+      go:
+        package: "db"
+        out: "./db/sqlc"
+        emit_json_tags: true
+        
+
+
+# version: "2"
+# cloud:
+#     organization: ""
+#     project: ""
+#     hostname: ""
+# sql: []
+# overrides:
+#     go: null
+# plugins: []
+# rules: []
