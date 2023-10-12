@@ -10,6 +10,12 @@ dropdb:
 execdb:
 	docker exec -it postgrestulb2 psql -U root simple_bank
 
+migratecreate:
+	migrate create -ext sql -dir db/migration -seq init_schema
+
+migrateupdate:
+	migrate create -ext sql -dir db/migration -seq update_schema
+
 migrateup:
 	migrate -path db/migration -database "postgresql://root:tulb@localhost:5432/simple_bank?sslmode=disable" -verbose up
 
@@ -22,10 +28,13 @@ sqlc:
 test:
 	go test -v -cover ./...
 
-.PHONY: postgres createdb dropdb migrateup migratedown sqlc
+.PHONY: postgres createdb dropdb migrateup migratedown sqlc migratecreate
 
-
+############################## TuLB noted ######################################
 # docker exec -it postgrestulb2 psql -U root simple_bank
 # if come across error when migration:
 # select * from schema_migrations; // to get the version
 # update schema_migrations set dirty =false where version=XXXX;
+
+# force version of schema_migrations to 1
+# migrate -path db/migration -database "postgresql://root:tulb@localhost:5432/simple_bank?sslmode=disable" -verbose force 1
