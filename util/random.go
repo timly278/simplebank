@@ -13,7 +13,7 @@ const (
 
 // RandomInt generate a random integer within [min,max]
 func RandomInt(min, max int64) int64 {
-	return min + rand.Int63n(max - min + 1)
+	return min + rand.Int63n(max-min+1)
 }
 
 // RandomString generate a random string with length n
@@ -34,7 +34,7 @@ func RandomOwner() string {
 }
 
 func RandomMoney() int64 {
-	return RandomInt(0, 1000)
+	return RandomInt(10, 1000)
 }
 
 func RandomCurrency() string {
@@ -45,10 +45,3 @@ func RandomCurrency() string {
 
 	return concur[rand.Intn(k)]
 }
-
-
-
-
-
-
-// generate Owner value, Balance value, Currency value

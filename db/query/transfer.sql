@@ -15,6 +15,7 @@ WHERE id = $1 LIMIT 1;
 -- name: ListTransfers :many
 SELECT * FROM transfers
 ORDER BY id
+
 LIMIT $1
 OFFSET $2;
 
