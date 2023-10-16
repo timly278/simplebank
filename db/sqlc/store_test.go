@@ -23,10 +23,8 @@ func TestTransferTx(t *testing.T) {
 	n := 5
 	amount := int64(10)
 	for i := 0; i < n; i++ {
-		txName := fmt.Sprintf("tx %d", i+1)
 		go func() {
-			ctx := context.WithValue(context.Background(), txKey, txName) // txKey should not be built-in type
-			result, err := store.TransferTx(ctx, TransferTxPrams{
+			result, err := store.TransferTx(context.Background(), TransferTxPrams{
 				FromAccountID: fromAccount.ID,
 				ToAccountID:   toAccount.ID,
 				Amount:        amount,
