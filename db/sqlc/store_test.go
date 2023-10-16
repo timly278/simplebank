@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -16,7 +15,6 @@ func TestTransferTx(t *testing.T) {
 
 	fromAccount := createRandomAccount(t)
 	toAccount := createRandomAccount(t)
-	fmt.Println(">> before:", fromAccount.Balance, toAccount.Balance)
 	rch := make(chan TransferTxResults)
 	ech := make(chan error)
 	// namechan := make(chan string)
@@ -31,7 +29,6 @@ func TestTransferTx(t *testing.T) {
 			})
 			ech <- err
 			rch <- result
-			// namechan <- txName
 		}()
 	}
 
@@ -86,8 +83,6 @@ func TestTransferTx(t *testing.T) {
 		require.NotEmpty(t, acc2)
 		require.Equal(t, toAccount.ID, acc2.ID)
 
-		fmt.Println(">> tx", acc1.Balance, acc2.Balance)
-
 		// Check accounts' balance
 		diff1 := fromAccount.Balance - acc1.Balance
 		diff2 := acc2.Balance - toAccount.Balance
@@ -110,8 +105,50 @@ func TestTransferTx(t *testing.T) {
 	updatedAccount2, err := testQueries.GetAccount(context.Background(), toAccount.ID)
 	require.NoError(t, err)
 
-	fmt.Println(">> after:", updatedAccount1.Balance, updatedAccount2.Balance)
 	require.Equal(t, fromAccount.Balance-int64(n)*amount, updatedAccount1.Balance)
 	require.Equal(t, toAccount.Balance+int64(n)*amount, updatedAccount2.Balance)
+
+}
+
+func TestTransferDeadlock(t *testing.T) {
+
+	store := NewStore(testDB)
+
+	fromAccount := createRandomAccount(t)
+	toAccount := createRandomAccount(t)
+	ech := make(chan error)
+	n := 10
+	amount := int64(10)
+	for i := 0; i < n; i++ {
+		fromID := fromAccount.ID
+		toID := toAccount.ID
+
+		if i % 2 == 1 {
+			fromID = toAccount.ID
+			toID = fromAccount.ID
+		}
+		go func() {
+			_, err := store.TransferTx(context.Background(), TransferTxPrams{
+				FromAccountID: fromID,
+				ToAccountID:   toID,
+				Amount:        amount,
+			})
+			ech <- err
+		}()
+	}
+
+	for i := 0; i < n; i++ {
+		err := <- ech
+		require.NoError(t, err)
+	}
+	// check the final update balance
+	updatedAccount1, err := testQueries.GetAccount(context.Background(), fromAccount.ID)
+	require.NoError(t, err)
+
+	updatedAccount2, err := testQueries.GetAccount(context.Background(), toAccount.ID)
+	require.NoError(t, err)
+
+	require.Equal(t, fromAccount.Balance, updatedAccount1.Balance)
+	require.Equal(t, toAccount.Balance, updatedAccount2.Balance)
 
 }
