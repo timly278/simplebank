@@ -10,7 +10,6 @@ import (
 
 // Write test, create 5 or 10 transactions of 2 accounts by using goroutines
 
-
 func TestTransferTx(t *testing.T) {
 
 	store := NewStore(testDB)
@@ -21,7 +20,7 @@ func TestTransferTx(t *testing.T) {
 	rch := make(chan TransferTxResults)
 	ech := make(chan error)
 	// namechan := make(chan string)
-	n := 2
+	n := 5
 	amount := int64(10)
 	for i := 0; i < n; i++ {
 		txName := fmt.Sprintf("tx %d", i+1)

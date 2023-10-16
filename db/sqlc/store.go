@@ -58,6 +58,7 @@ type TransferTxResults struct {
 }
 
 var txKey = struct{}{}
+
 // TransferTx perform a money transfer from one account to the other
 // It create a transfer record, add account entries, update accounts' balances within a single database transaction
 func (store *Store) TransferTx(ctx context.Context, arg TransferTxPrams) (TransferTxResults, error) {
@@ -100,7 +101,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxPrams) (Transf
 		}
 		fmt.Println(txName, "update account1")
 		result.FromAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{
-			ID: arg.FromAccountID,
+			ID:      arg.FromAccountID,
 			Balance: account1.Balance - arg.Amount,
 		})
 		if err != nil {
@@ -112,11 +113,11 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxPrams) (Transf
 		if err != nil {
 			return err
 		}
-		
+
 		// Update account's balance
 		fmt.Println(txName, "update account2")
 		result.ToAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{
-			ID: arg.ToAccountID,
+			ID:      arg.ToAccountID,
 			Balance: account2.Balance + arg.Amount,
 		})
 		if err != nil {
@@ -127,4 +128,4 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxPrams) (Transf
 	})
 
 	return result, err
- }
+}
