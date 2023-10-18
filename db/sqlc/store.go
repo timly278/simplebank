@@ -6,14 +6,19 @@ import (
 	"fmt"
 )
 
+type Store interface {
+	Querier
+	TransferTx(ctx context.Context, arg TransferTxPrams) (TransferTxResults, error)
+}
+
 // Store provides all functions to execute db queries and transactions
-type Store struct {
+type SQLStore struct {
 	*Queries
 	db *sql.DB
 }
 
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		Queries: New(db),
 		db:      db,
 	}
@@ -25,7 +30,7 @@ func NewStore(db *sql.DB) *Store {
 // => that's why we use callback function and apply pass anonynomous func to execTx
 //
 //	to increase flexibility
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -59,7 +64,7 @@ type TransferTxResults struct {
 
 // TransferTx perform a money transfer from one account to the other
 // It create a transfer record, add account entries, update accounts' balances within a single database transaction
-func (store *Store) TransferTx(ctx context.Context, arg TransferTxPrams) (TransferTxResults, error) {
+func (store *SQLStore) TransferTx(ctx context.Context, arg TransferTxPrams) (TransferTxResults, error) {
 	var result TransferTxResults
 
 	err := store.execTx(ctx, func(q *Queries) error {

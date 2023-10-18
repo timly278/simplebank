@@ -39,7 +39,7 @@ func RandomMoney() int64 {
 
 func RandomCurrency() string {
 	// "EUR", "USD", "CAD"
-	concur := []string{"EUR", "USD", "CAD"}
+	concur := []string{EUR, USD, CAD}
 
 	k := len(concur)
 
