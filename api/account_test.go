@@ -31,7 +31,6 @@ func TestGetAccountApi(t *testing.T) {
 			accountID: account.ID,
 			buildStubs: func(store *mockdb.MockStore) {
 				store.EXPECT().
-					// Tại sao lại nhảy được vào GetAccount(ctx, req.ID) trong getAccount(ctx *gin.Context)
 					GetAccount(gomock.Any(), gomock.Eq(account.ID)).
 					Times(1). // TODO: What if Times(2) and wanted to return different results?
 					Return(account, nil)
