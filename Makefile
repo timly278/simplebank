@@ -19,6 +19,9 @@ migrateupdate:
 migrateup1:
 	migrate -path db/migration -database "postgresql://root:tulb@localhost:5432/simple_bank?sslmode=disable" -verbose up 1
 
+migrateup:
+	migrate -path db/migration -database "postgresql://root:tulb@localhost:5432/simple_bank?sslmode=disable" -verbose up
+
 migratedown1:
 	migrate -path db/migration -database "postgresql://root:tulb@localhost:5432/simple_bank?sslmode=disable" -verbose down 1
 
