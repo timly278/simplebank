@@ -6,19 +6,23 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	mockdb "github.com/timly278/simplebank/db/mock"
 	db "github.com/timly278/simplebank/db/sqlc"
+	"github.com/timly278/simplebank/token"
 	"github.com/timly278/simplebank/util"
 )
 
 func TestTransferAPI(t *testing.T) {
 	amount := int64(10)
-	account1 := randomAccount()
-	account2 := randomAccount()
+	_, user1 := randomUser(t)
+	_, user2 := randomUser(t)
+	account1 := randomAccount(user1.Username)
+	account2 := randomAccount(user2.Username)
 
 	account1.Currency = util.USD
 	account2.Currency = util.USD
@@ -27,6 +31,7 @@ func TestTransferAPI(t *testing.T) {
 		name          string
 		body          gin.H
 		buildStubs    func(store *mockdb.MockStore)
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -47,6 +52,9 @@ func TestTransferAPI(t *testing.T) {
 					Amount:        amount,
 				}
 				store.EXPECT().TransferTx(gomock.Any(), gomock.Eq(transferParams)).Times(1)
+			},
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, AUTHORIZATION_TYPE_BEARER, user1.Username, time.Minute)
 			},
 			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -72,8 +80,8 @@ func TestTransferAPI(t *testing.T) {
 		request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(data))
 		require.NoError(t, err)
 
+		tc.setupAuth(t, request, server.tokenMaker)
 		server.router.ServeHTTP(recorder, request)
-
 		tc.checkResponse(t, recorder)
 	}
 }

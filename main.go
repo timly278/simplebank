@@ -11,6 +11,8 @@ import (
 )
 
 
+// TODO: CHia nhỏ toàn bộ các function, API thành những function nhỏ hơn, dễ hiểu hơn
+
 func main() {
 
 	config, err := util.LoadConfig(".")
